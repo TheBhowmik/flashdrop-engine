@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev:api": "tsx watch src/api/server.ts",
-  "dev:worker": "tsx watch src/worker/index.ts",
-  "db:setup": "tsx src/config/setupDb.ts",
-  "build": "tsc"
+    "dev:api": "tsx watch src/api/server.ts",
+    "dev:worker": "tsx watch src/worker/index.ts",
+    "db:setup": "tsx src/config/setupDb.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,7 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
+    "artillery": "^2.0.34",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "tsx": "^4.23.15",

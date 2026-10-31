@@ -1,0 +1,15 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 10
+      arrivalRate: 150
+      name: "Flash Sale Spike"
+scenarios:
+  - name: "Place Order"
+    flow:
+      - post:
+          url: "/api/orders"
+          json:
+            userId: "123e4567-e89b-12d3-a456-426614174000"
+            productId: "123e4567-e89b-12d3-a456-426614174001"
+            quantity: 1
