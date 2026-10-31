@@ -1,6 +1,6 @@
 import { Kafka } from 'kafkajs';
-import { db } from '../config/db';
-import { OrderRequest } from '../schema/orderSchema';
+import { db } from '../config/db.js';
+import type { OrderRequest } from '../schema/orderSchema.js';
 
 const kafka = new Kafka({
     clientId: 'flashdrop-worker',

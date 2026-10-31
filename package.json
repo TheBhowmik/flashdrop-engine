@@ -12,7 +12,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
@@ -20,11 +20,13 @@
     "kafkajs": "^2.2.4",
     "pg": "^8.23.1",
     "redis": "^6.3.1",
+    "socket.io": "^4.8.4",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
     "artillery": "^2.0.34",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",

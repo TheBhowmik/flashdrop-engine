@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { db } from '../config/db';
-import { OrderRequestSchema } from '../schema/orderSchema';
-import { rateLimiter } from '../middleware/rateLimiter';
-import '../config/redis'; 
-import { producer, connectKafkaProducer } from '../config/kafka';
+import { db } from '../config/db.js';
+import { OrderRequestSchema } from '../schema/orderSchema.js';
+import { rateLimiter } from '../middleware/rateLimiter.js';
+import '../config/redis.js';
+import { producer, connectKafkaProducer } from '../config/kafka.js';
 
 dotenv.config();
 

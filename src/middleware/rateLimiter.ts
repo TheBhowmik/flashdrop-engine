@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { redisClient } from '../config/redis';
+import type { Request, Response, NextFunction } from 'express';
+import { redisClient } from '../config/redis.js';
 
 export const rateLimiter = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     // In production behind a load balancer, use req.headers['x-forwarded-for']
