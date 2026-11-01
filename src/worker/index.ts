@@ -1,6 +1,7 @@
 import { Kafka } from 'kafkajs';
 import { db } from '../config/db.js';
 import type { OrderRequest } from '../schema/orderSchema.js';
+import { redisClient } from '../config/redis.js';
 
 const kafka = new Kafka({
     clientId: 'flashdrop-worker',
@@ -16,7 +17,7 @@ const processOrder = async (order: OrderRequest) => {
         // 1. Begin ACID Transaction
         await client.query('BEGIN');
 
-        // 2. ROW-LEVEL LOCK: Prevent any other concurrent transaction from modifying this product
+        // 2. ROW-LEVEL LOCK: Prevent concurrent modification
         const productRes = await client.query(
             'SELECT stock FROM products WHERE id = $1 FOR UPDATE', 
             [order.productId]
@@ -32,6 +33,14 @@ const processOrder = async (order: OrderRequest) => {
         if (currentStock < order.quantity) {
             console.log(`❌ Order failed for user ${order.userId}: OUT OF STOCK`);
             await client.query('ROLLBACK');
+            
+            // Broadcast failure over WebSocket
+            await redisClient.publish('order-updates', JSON.stringify({
+                userId: order.userId,
+                status: 'FAILED',
+                message: 'Out of stock'
+            }));
+            
             return;
         }
 
@@ -48,7 +57,17 @@ const processOrder = async (order: OrderRequest) => {
 
         // 5. Commit Transaction
         await client.query('COMMIT');
-        console.log(`✅ Order processed for user ${order.userId}. Stock remaining: ${currentStock - order.quantity}`);
+        
+        const newStock = currentStock - order.quantity;
+        console.log(`✅ Order processed for user ${order.userId}. Stock remaining: ${newStock}`);
+
+        // Broadcast success over WebSocket
+        await redisClient.publish('order-updates', JSON.stringify({
+            userId: order.userId,
+            status: 'SUCCESS',
+            stockRemaining: newStock,
+            message: 'Order confirmed!'
+        }));
 
     } catch (error) {
         await client.query('ROLLBACK');

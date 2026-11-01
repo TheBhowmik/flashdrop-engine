@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>FlashDrop Live Inventory</h2>
+    <h1 id="stock">Waiting for updates...</h1>
+    <ul id="logs"></ul>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:3000');
+        
+        socket.on('inventory-update', (data) => {
+            if (data.status === 'SUCCESS') {
+                document.getElementById('stock').innerText = `Stock Remaining: ${data.stockRemaining}`;
+            }
+            const li = document.createElement('li');
+            li.innerText = `User ${data.userId}: ${data.status} - ${data.message}`;
+            document.getElementById('logs').prepend(li);
+        });
+    </script>
+</body>
+</html>

@@ -1,17 +1,26 @@
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { db } from '../config/db.js';
 import { OrderRequestSchema } from '../schema/orderSchema.js';
 import { rateLimiter } from '../middleware/rateLimiter.js';
-import '../config/redis.js';
+import { redisClient } from '../config/redis.js';
 import { producer, connectKafkaProducer } from '../config/kafka.js';
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
 app.use(cors());
 app.use(express.json());
+
+io.on('connection', (socket) => {
+    console.log(`🟢 Client connected: ${socket.id}`);
+});
 
 app.get('/health', async (req, res) => {
     try {
@@ -33,7 +42,7 @@ app.post('/api/orders', rateLimiter, async (req, res) => {
             topic: 'order-requests',
             messages: [
                 { 
-                    key: validatedData.userId, // Ensures orders from the same user are processed in order
+                    key: validatedData.userId, 
                     value: JSON.stringify(validatedData) 
                 },
             ],
@@ -57,7 +66,17 @@ app.post('/api/orders', rateLimiter, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, async () => {
-    await connectKafkaProducer(); // Boot Kafka producer when server starts
-    console.log(`🚀 API Gateway running on port ${PORT}`);
+server.listen(PORT, async () => {
+    await connectKafkaProducer();
+    
+    // Create a dedicated Redis subscriber connection for WebSockets
+    const redisSub = redisClient.duplicate();
+    await redisSub.connect();
+    
+    await redisSub.subscribe('order-updates', (message) => {
+        const eventData = JSON.parse(message);
+        io.emit('inventory-update', eventData); 
+    });
+
+    console.log(`🚀 API Gateway & WebSocket Server running on port ${PORT}`);
 });
