@@ -8,6 +8,7 @@ import { OrderRequestSchema } from '../schema/orderSchema.js';
 import { rateLimiter } from '../middleware/rateLimiter.js';
 import { redisClient } from '../config/redis.js';
 import { producer, connectKafkaProducer } from '../config/kafka.js';
+import { idempotencyCheck } from '../middleware/idempotency.js';
 
 dotenv.config();
 
@@ -32,7 +33,7 @@ app.get('/health', async (req, res) => {
     }
 });
 
-app.post('/api/orders', rateLimiter, async (req, res) => {
+app.post('/api/orders', rateLimiter, idempotencyCheck, async (req, res) => {
     try {
         // 1. Validate payload
         const validatedData = OrderRequestSchema.parse(req.body);

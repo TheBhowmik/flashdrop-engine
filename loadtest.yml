@@ -5,11 +5,12 @@ config:
       arrivalRate: 150
       name: "Flash Sale Spike"
 scenarios:
-  - name: "Place Order"
-    flow:
+  - flow:
       - post:
           url: "/api/orders"
+          headers:
+            x-idempotency-key: "{{ $uuid }}"
           json:
-            userId: "123e4567-e89b-12d3-a456-426614174000"
-            productId: "123e4567-e89b-12d3-a456-426614174001"
+            userId: "user_{{ $randomNumber(1,1000) }}"
+            productId: "prod_1"
             quantity: 1
